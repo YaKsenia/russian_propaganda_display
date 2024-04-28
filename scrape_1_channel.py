@@ -16,6 +16,7 @@ from selenium.webdriver.firefox.service import Service
 import time
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from deep_translator import GoogleTranslator
 
 def scrape_article(url):
 
@@ -99,17 +100,35 @@ def get_links(url):
 				#here you should specify the range of pages you want to scrape (you can start with 1)
             		plain_text = driver.page_source
             		html = BeautifulSoup(plain_text, "html.parser")
-            		articles = html.find_all('div', {'class': 'itv-col-8 itv-col-hd-12'})
+            		#articles = html.find_all('div', {'class': 'itv-col-8 itv-col-hd-12'})
+            		articles = html.find_all('h2')
+            		#print(articles)
+            		
             		counter = 0
+            		clean_titles = []
             		for article in articles:
+        		  
+		            		title = article.get_text()
+		            		if 'Выпуск новостей' not in title and 'Выпуск программы' not in title and 'Архив новостей' not in title and 'Все новости за' not in title:
+		            		    print(title, '\n')
+		            		    #clean_titles = clean_titles.join(str(title) + '*')
+		            		    clean_titles.append(title)
+		            		    counter += 1                                                            
+		            		    print(counter) 
+            		print(clean_titles)
+                        
 						#find all links on the page
+            		'''
             		            		ankor_list = article.findChildren('a')
             		            		for ankor in ankor_list:
 
-            		            		            		url = ankor.get('href')
-            		            		            		print(url)
-            		            		            		counter += 1                                                            
-            		            		            		print(counter)                                                            
+            		            		            		link = ankor.get('href')
+            		            		            		#print(link)
+            		            		            		if url in link and ("vypusk_novostey" in link or "vypusk_programmy_vremya" in link):
+                		            		            		#print(link)
+                		            		            		counter += 1                                                            
+                		            		            		#print(counter) 
+                                                                '''
             		#if time.time() > timeout:
             		            		#break
                                     
@@ -129,7 +148,7 @@ def get_links(url):
 	#	links = pd.DataFrame({'links' : links })
 	#	links = links.drop_duplicates(subset='links', keep='last', inplace=False)
 
-	#	return links
+            		return clean_titles
 
 	except Exception as e:
 		print(e)
@@ -137,9 +156,27 @@ def get_links(url):
 	finally:
 		driver.quit()
 		print('Finished.')
+        
+        
+def translate(clean_titles):
+
+
+# Use any translator you like, in this example GoogleTranslator
+    #for title in clean_titles:
+        str_clean_titles = ' '.join([str(elem) for i,elem in enumerate(clean_titles)])
+        if len(str_clean_titles) > 998:
+            str_clean_titles = str_clean_titles[:998]
+            print(str_clean_titles)
+        print(len(str_clean_titles))
+        translated = GoogleTranslator(source='auto', target='en').translate(str_clean_titles) 
+        print(translated)
+        
+    #return translated
 
 if __name__ == "__main__":
-    url = 'https://free.1tv.ru/news/2024-04-18/'
+    url = 'https://free.1tv.ru/news/2024-04-15/'
     #'https://free.1tv.ru/news/2024-04-19/'
     
     result = get_links(url)
+    translation = translate(result)
+    #print(translation)
