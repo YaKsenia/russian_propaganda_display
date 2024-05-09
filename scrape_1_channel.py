@@ -17,6 +17,7 @@ import time
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from deep_translator import GoogleTranslator
+import pandas as pd
 
 def scrape_article(url):
 
@@ -112,7 +113,7 @@ def get_links(url):
 		            		if 'Выпуск новостей' not in title and 'Выпуск программы' not in title and 'Архив новостей' not in title and 'Все новости за' not in title:
 		            		    print(title, '\n')
 		            		    #clean_titles = clean_titles.join(str(title) + '*')
-		            		    clean_titles.append(title)
+		            		    clean_titles.append(title + '*')
 		            		    counter += 1                                                            
 		            		    print(counter) 
             		print(clean_titles)
@@ -147,8 +148,11 @@ def get_links(url):
 		
 	#	links = pd.DataFrame({'links' : links })
 	#	links = links.drop_duplicates(subset='links', keep='last', inplace=False)
-
-            		return clean_titles
+            		str_clean_titles = ' '.join([str(elem) for i,elem in enumerate(clean_titles)])
+            		f = open("new.txt", "a")
+            		f.write(str_clean_titles)
+            		f.close()
+            		return str_clean_titles
 
 	except Exception as e:
 		print(e)
@@ -158,25 +162,32 @@ def get_links(url):
 		print('Finished.')
         
         
-def translate(clean_titles):
+def translate(str_clean_titles):
 
 
 # Use any translator you like, in this example GoogleTranslator
     #for title in clean_titles:
-        str_clean_titles = ' '.join([str(elem) for i,elem in enumerate(clean_titles)])
-        if len(str_clean_titles) > 998:
-            str_clean_titles = str_clean_titles[:998]
-            print(str_clean_titles)
+        
+        #str_clean_titles = ' '.join([str(elem) for i,elem in enumerate(clean_titles)])
+        if len(str_clean_titles) > 3010:
+            str_clean_titles1 = str_clean_titles[:3010]
+            str_clean_titles2 = str_clean_titles[3010:6020]
+            #crashed at 3098
+            print(len(str_clean_titles1))
+            print(str_clean_titles2)
         print(len(str_clean_titles))
-        translated = GoogleTranslator(source='auto', target='en').translate(str_clean_titles) 
-        print(translated)
+        translated = GoogleTranslator(source='auto', target='en').translate(str_clean_titles1) 
+        translated2 = GoogleTranslator(source='auto', target='en').translate(str_clean_titles2) 
+        #print(translated)
+        #print(translated2)
+        return translated + translated2
         
     #return translated
 
 if __name__ == "__main__":
-    url = 'https://free.1tv.ru/news/2024-04-15/'
+    url = 'https://free.1tv.ru/news/2024-04-16/'
     #'https://free.1tv.ru/news/2024-04-19/'
     
     result = get_links(url)
-    translation = translate(result)
+    #translation = translate(result)
     #print(translation)
